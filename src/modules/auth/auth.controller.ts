@@ -14,6 +14,6 @@ export class AuthController {
   @Post('login')
   async login(@Body(new ValidationPipe()) loginUser: Partial<CreateAuthDto>) {
     const data = await this.authService.login(loginUser);
-    return { data };
+    return data;
   }
 }

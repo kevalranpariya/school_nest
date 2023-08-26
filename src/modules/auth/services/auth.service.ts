@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { User } from '../entities/auth.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,12 +15,6 @@ export class AuthService {
     private jwtAuthService: JwtAuthService,
   ) {}
   async create(createUser: CreateAuthDto) {
-    const isUniqueEmailUsername = await this.authRepository.findOne({
-      where: [{ email: createUser.email }, { username: createUser.username }],
-    });
-    if (isUniqueEmailUsername) {
-      throw new BadRequestException('Email OR Username is already exits');
-    }
     createUser.password = await this.bcryptService.hashPassword(
       createUser.password,
     );
@@ -36,9 +26,6 @@ export class AuthService {
     const findUser = await this.authRepository.findOne({
       where: { email: loginUser.email },
     });
-    if (!findUser) {
-      throw new NotFoundException('User not found');
-    }
     const passCheck = await this.bcryptService.comparePasswords(
       loginUser.password,
       findUser?.password,

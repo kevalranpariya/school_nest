@@ -5,7 +5,7 @@ import {
   IsString,
   IsStrongPassword,
 } from 'class-validator';
-import { UserRole } from 'src/shared/enums/roles';
+import { UserRole } from 'src/common/enums/roles';
 
 export class CreateAuthDto {
   @IsNotEmpty()

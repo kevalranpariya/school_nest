@@ -3,11 +3,11 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
-  ValidationPipe,
+  ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { ClassService } from './class.service';
 import { CreateClassDto } from './dto/create-class.dto';
@@ -17,14 +17,14 @@ import { RolesGuard } from 'src/core/guard/role.guard';
 import { Roles } from 'src/core/guard/roles.decorator';
 
 @Controller('class')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@Roles('principal')
 export class ClassController {
   constructor(private readonly classService: ClassService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('principal')
   async create(
-    @Body(new ValidationPipe())
+    @Body()
     createClassDto: CreateClassDto,
   ) {
     return this.classService.create(createClassDto);
@@ -36,17 +36,20 @@ export class ClassController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.classService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.classService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClassDto: UpdateClassDto) {
-    return this.classService.update(+id, updateClassDto);
+  @Put(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateClassDto: UpdateClassDto,
+  ) {
+    return this.classService.update(id, updateClassDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.classService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.classService.remove(id);
   }
 }

@@ -22,6 +22,6 @@ export class Class {
   teacherId: number;
 
   @OneToOne(() => User)
-  @JoinColumn() // Specify the join column
-  teacher: User; // Now you can navigate to the associated teacher
+  @JoinColumn()
+  teacher: User;
 }

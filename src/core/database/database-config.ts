@@ -18,6 +18,7 @@ const { DB_USER, DB_PASSWORD, DB_HOST } = process.env;
       database: 'nestpractice',
       entities: [User, Class],
       synchronize: true,
+      // maxQueryExecutionTime: 1000,
       // migrations: [CreateUsersTable],
       // migrationsTableName: 'typeORM_migration',
     }),
