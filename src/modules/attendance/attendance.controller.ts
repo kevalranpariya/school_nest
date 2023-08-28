@@ -3,45 +3,61 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  ValidationPipe,
+  UseGuards,
+  ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/core/guard/role.guard';
+import { Roles } from 'src/core/decorator/roles.decorator';
+import { UserId } from 'src/core/decorator/user.decorator';
 
 @Controller('attendance')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
   @Post()
-  create(@Body(new ValidationPipe()) createAttendanceDto: CreateAttendanceDto) {
-    console.log(createAttendanceDto);
-    // return this.attendanceService.create(createAttendanceDto);
+  @Roles('teacher')
+  async create(@Body() createAttendanceDto: CreateAttendanceDto) {
+    return await this.attendanceService.create(createAttendanceDto);
   }
 
   @Get()
-  findAll() {
-    return this.attendanceService.findAll();
+  async findAll(@UserId() id: number) {
+    return await this.attendanceService.findAll(id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.attendanceService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAttendanceDto: UpdateAttendanceDto,
+  @Get(':studentId')
+  @Roles('teacher')
+  findOne(
+    @Param('studentId', ParseIntPipe) studentId: number,
+    @UserId() id: number,
   ) {
-    return this.attendanceService.update(+id, updateAttendanceDto);
+    return this.attendanceService.findOne(id, studentId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.attendanceService.remove(+id);
+  @Put(':attendanceId')
+  @Roles('teacher')
+  update(
+    @Param('attendanceId', ParseIntPipe) attendanceId: number,
+    @Body() updateAttendanceDto: UpdateAttendanceDto,
+    @UserId() id: number,
+  ) {
+    return this.attendanceService.update(id, attendanceId, updateAttendanceDto);
+  }
+
+  @Delete(':attendanceId')
+  @Roles('teacher')
+  remove(
+    @Param('attendanceId', ParseIntPipe) attendanceId: number,
+    @UserId() id: number,
+  ) {
+    return this.attendanceService.remove(id, attendanceId);
   }
 }

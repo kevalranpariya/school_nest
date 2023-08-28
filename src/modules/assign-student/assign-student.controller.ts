@@ -3,11 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Req,
   UseGuards,
+  ParseIntPipe,
+  Put,
 } from '@nestjs/common';
 import { AssignStudentService } from './assign-student.service';
 import { CreateAssignStudentDto } from './dto/create-assign-student.dto';
@@ -15,14 +16,14 @@ import { UpdateAssignStudentDto } from './dto/update-assign-student.dto';
 import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/core/guard/role.guard';
-import { Roles } from 'src/core/guard/roles.decorator';
+import { Roles } from 'src/core/decorator/roles.decorator';
 import { User } from '../auth/entities/auth.entity';
 
 @Controller('assignStudent')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AssignStudentController {
   constructor(private readonly assignStudentService: AssignStudentService) {}
 
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('teacher')
   @Post()
   create(
@@ -33,7 +34,6 @@ export class AssignStudentController {
     return this.assignStudentService.create(id, createAssignStudentDto);
   }
 
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('teacher')
   @Get()
   findAll(@Req() req: Request) {
@@ -41,21 +41,38 @@ export class AssignStudentController {
     return this.assignStudentService.findAll(id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.assignStudentService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAssignStudentDto: UpdateAssignStudentDto,
+  @Roles('teacher')
+  @Get(':studentId')
+  findOne(
+    @Param('studentId', ParseIntPipe) studentId: number,
+    @Req() req: Request,
   ) {
-    return this.assignStudentService.update(+id, updateAssignStudentDto);
+    const { id } = req.user as User;
+    return this.assignStudentService.findOne(id, studentId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.assignStudentService.remove(+id);
+  @Roles('teacher')
+  @Put(':studentId')
+  update(
+    @Param('studentId', ParseIntPipe) studentId: number,
+    @Body() updateAssignStudentDto: UpdateAssignStudentDto,
+    @Req() req: Request,
+  ) {
+    const { id } = req.user as User;
+    return this.assignStudentService.update(
+      id,
+      studentId,
+      updateAssignStudentDto,
+    );
+  }
+
+  @Roles('teacher')
+  @Delete(':studentId')
+  remove(
+    @Param('studentId', ParseIntPipe) studentId: number,
+    @Req() req: Request,
+  ) {
+    const { id } = req.user as User;
+    return this.assignStudentService.remove(id, studentId);
   }
 }

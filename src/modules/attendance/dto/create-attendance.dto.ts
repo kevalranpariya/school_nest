@@ -3,7 +3,7 @@ import { AttendanceStatus } from 'src/common/enums/attendance.status';
 
 export class CreateAttendanceDto {
   @IsDateString()
-  date: Date;
+  date: string;
 
   @IsNotEmpty()
   @IsString()
@@ -12,5 +12,5 @@ export class CreateAttendanceDto {
 
   @IsNotEmpty()
   @IsString()
-  student_id: string;
+  studentId: string;
 }

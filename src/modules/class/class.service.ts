@@ -32,14 +32,14 @@ export class ClassService {
     id: number,
     updateClassDto: UpdateClassDto,
   ): Promise<UpdateResult> {
-    const findClass = await this.findOne(id);
+    const findClass = await this.classRepository.findOne({ where: { id } });
     return !findClass
       ? null
       : await this.classRepository.update(id, updateClassDto);
   }
 
   async remove(id: number): Promise<DeleteResult> {
-    const findClass = await this.findOne(id);
+    const findClass = await this.classRepository.findOne({ where: { id } });
     return !findClass ? null : await this.classRepository.delete(id);
   }
 }

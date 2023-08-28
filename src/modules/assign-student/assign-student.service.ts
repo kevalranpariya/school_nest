@@ -36,32 +36,58 @@ export class AssignStudentService {
   }
 
   async findAll(id: number) {
-    // return await this.assignStudentRepository.find({
-    //   where: {
-    //     class: {
-    //       teacherId: id,
-    //     },
-    //   },
-    //   relations: ['class'],
-    // });
-
     return await this.classRepository.find({
       where: {
         teacherId: id,
+      },
+      relations: ['assignStudent', 'assignStudent.student'],
+    });
+  }
+
+  async findOne(id: number, studentId: number) {
+    return await this.assignStudentRepository.findOne({
+      where: {
+        id: studentId,
+        class: {
+          teacherId: id,
+        },
       },
       relations: ['class'],
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} assignStudent`;
+  async update(
+    id: number,
+    studentId: number,
+    updateAssignStudentDto: UpdateAssignStudentDto,
+  ) {
+    const findAssignStudent = await this.assignStudentRepository.findOne({
+      where: {
+        id: studentId,
+        class: {
+          teacherId: id,
+        },
+      },
+    });
+    return !findAssignStudent
+      ? null
+      : await this.assignStudentRepository.update(
+          studentId,
+          updateAssignStudentDto,
+        );
   }
 
-  update(id: number, updateAssignStudentDto: UpdateAssignStudentDto) {
-    return `This action updates a #${id} assignStudent`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} assignStudent`;
+  async remove(id: number, studentId: number) {
+    const findAssignStudent = await this.assignStudentRepository.findOne({
+      where: {
+        id: studentId,
+        class: {
+          teacherId: id,
+        },
+      },
+    });
+    return !findAssignStudent
+      ? null
+      : await this.assignStudentRepository.delete(studentId);
   }
 }
